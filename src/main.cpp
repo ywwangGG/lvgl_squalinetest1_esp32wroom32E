@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <lvgl.h>
 //#include <demos/lv_demos.h>
 //#include <examples/lv_examples.h>
@@ -24,7 +26,30 @@ void my_print(const char * buf)
     Serial.flush();
 }
 #endif
+/*
+  多任务相关函数
+*/
+void displayTask(void *parameter) {
+    while (1) {
+        lv_task_handler(); // 让 GUI 做它的工作
+        vTaskDelay(pdMS_TO_TICKS(10)); // 使用 vTaskDelay 代替 delay,esp32dev里设置的是1000tick每秒
+    }
+}
 
+void buttonTask(void *parameter) { // 按钮任务
+    while (1) {
+        int buttonState = digitalRead(BUTTON_PIN);
+        Serial.print("gobalval = ");
+        Serial.println(gobalval);
+        
+        if (buttonState == LOW) {
+            Serial.println("start button pressed");
+            _ui_screen_change(&ui_Screen2, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Screen2_screen_init); // 切换屏幕
+        }
+        
+        vTaskDelay(pdMS_TO_TICKS(50)); // 使用 vTaskDelay 代替 delay
+    }
+}
 /* Display flushing */
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
@@ -95,6 +120,9 @@ void setup()
     
     ui_init();
     Serial.println("Setup done");
+    // 创建 FreeRTOS 任务
+    // xTaskCreatePinnedToCore(displayTask, "Display Task", 2048, NULL, 2, NULL, 0);
+    // xTaskCreatePinnedToCore(buttonTask, "Button Task", 2048, NULL, 1, NULL, 1);
 }
 
 
