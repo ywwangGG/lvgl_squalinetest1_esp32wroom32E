@@ -32,7 +32,7 @@ void my_print(const char * buf)
 void displayTask(void *parameter) {
     while (1) {
         lv_task_handler(); // 让 GUI 做它的工作
-        vTaskDelay(pdMS_TO_TICKS(10)); // 使用 vTaskDelay 代替 delay,esp32dev里设置的是1000tick每秒
+        vTaskDelay(pdMS_TO_TICKS(5)); // 使用 vTaskDelay 代替 delay,esp32dev里设置的是1000tick每秒
     }
 }
 
@@ -121,21 +121,21 @@ void setup()
     ui_init();
     Serial.println("Setup done");
     // 创建 FreeRTOS 任务
-    // xTaskCreatePinnedToCore(displayTask, "Display Task", 2048, NULL, 2, NULL, 0);
-    // xTaskCreatePinnedToCore(buttonTask, "Button Task", 2048, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(displayTask, "Display Task", 4096, NULL, 2, NULL, 1);
+    xTaskCreatePinnedToCore(buttonTask, "Button Task", 2048, NULL, 1, NULL, 0);
 }
 
 
 void loop()
 {
-    buttonState = digitalRead(BUTTON_PIN);
-    Serial.print("gobalval = ");
-    Serial.println(gobalval);
-    lv_task_handler(); /* let the GUI do its work */
-    delay(5);
-    if (buttonState == LOW) {
-    // Button is pressed
-        Serial.println("start button pressed");
-        _ui_screen_change( &ui_Screen2, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Screen2_screen_init); // Change screen 
-         }
+    // buttonState = digitalRead(BUTTON_PIN);
+    // Serial.print("gobalval = ");
+    // Serial.println(gobalval);
+    // lv_task_handler(); /* let the GUI do its work */
+    // delay(5);
+    // if (buttonState == LOW) {
+    // // Button is pressed
+    //     Serial.println("start button pressed");
+    //     _ui_screen_change( &ui_Screen2, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Screen2_screen_init); // Change screen 
+    //      }
 }
